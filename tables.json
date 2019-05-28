@@ -1,0 +1,66 @@
+{
+	"maps":
+	[
+		"Bois de Limors",
+		"Carpiquet",
+		"Carpiquet Duellist",
+		"Caumont L'Evente",
+		"Cheux",
+		"Colleville",
+		"Colombelles",
+		"Cote 112",
+		"Merderet",
+		"Mont Ormel",
+		"Odon",
+		"Odon River",
+		"Omaha",
+		"Pegasus Bridge",
+		"Pointe du Hoc",
+		"Saint-Mere-Eglise",
+		"Saint-Mere-Eglise Duellists"
+	],
+
+	"allydivs":
+	[
+		"3rd Armoured",
+		"4th Armoured",
+		"101st Airborne",
+		"2nd Infantry",
+		"2e Blindee",
+		"Demi-Brigade SAS",
+		"7th Armoured",
+		"Guards Armoured",
+		"6th Airborne",
+		"15th Infantry",
+		"1st SSB",
+		"3rd Canadian Infantry",
+		"1 Pancerna",
+		"1st Infantry"
+	],
+
+	"axisdivs":
+	[
+		"Panzer-Lehr",
+		"12. SS-Panzer",
+		"1. SS-Panzer",
+		"2. Panzer",
+		"9. Panzer",
+		"21. Panzer",
+		"116. Panzer",
+		"17. SS-Panzergrenadier",
+		"3. Fallschirmjager",
+		"16. Luftwaffe",
+		"91. Luftlande",
+		"Festung Gross-Paris",
+		"352. Infanterie",
+		"716. Infanterie"
+	],
+
+	"opdivs":
+	[
+		"4th Armoured",
+		"7th Armoured",
+		"1. SS-Panzer",
+		"2. Panzer"
+	]
+}	

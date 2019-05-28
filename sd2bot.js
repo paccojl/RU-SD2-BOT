@@ -1,59 +1,13 @@
 const Discord = require('discord.js');
+const Util = require('./utils.js')
 const client = new Discord.Client();
 const config = require("./config");
-const mapsConst = [
-		"Bois de Limors",
-		"Carpiquet",
-		"Carpiquet Duellist",
-		"Caumont L'Evente",
-		"Cheux",
-		"Colleville",
-		"Colombelles",
-		"Cote 112",
-		"Merderet",
-		"Mont Ormel",
-		"Odon",
-		"Odon River",
-		"Omaha",
-		"Pegasus Bridge",
-		"Pointe du Hoc",
-		"Saint-Mere-Eglise",
-		"Saint-Mere-Eglise Duellists"
-	];
-const axisConst = [
-		"Panzer-Lehr",
-		"12. SS-Panzer",
-		"1. SS-Panzer",
-		"2. Panzer",
-		"9. Panzer",
-		"21. Panzer",
-		"116. Panzer",
-		"17. SS-Panzergrenadier",
-		"3. Fallschirmjager",
-		"16. Luftwaffe",
-		"91. Luftlande",
-		"Festung Gross-Paris",
-		"352. Infanterie",
-		"716. Infanterie"
-	];
-const alliesConst = [
-		"3rd Armoured",
-		"4th Armoured",
-		"101st Airborne",
-		"2nd Infantry",
-		"2e Blindee",
-		"Demi-Brigade SAS",
-		"7th Armoured",
-		"Guards Armoured",
-		"6th Airborne",
-		"15th Infantry",
-		"1st SSB",
-		"3rd Canadian Infantry",
-		"1 Pancerna",
-		"1st Infantry"
-	];
+const tables = require("./tables");
+const mapsConst = tables.maps;
+const axisConst = tables.axisdivs;
+const alliesConst = tables.allydivs;
 
-const emojis = ["🇦","🇧","🇨","🇩","🇪","🇫","🇬","🇭","🇮","🇯","🇰","🇱","🇲","🇳","🇴","🇵","🇶","🇷","🇸","🇹","🇺","🇻","🇼","🇽","🇾"];
+
 
 client.login(config.token);
 
@@ -62,85 +16,82 @@ client.on('ready' , () => {
 
 
 
-async function process(message) {
+function process(message) {
 	if(message.content.startsWith("setup")){
-
-		let firstSide = random([0,1]);
-
-		let axisUser;
-		let alliesUser;
-
-		if(firstSide = 0){
-			axisUser = message.mentions.members.first(1)[0];
-			alliesUser = message.mentions.members.first(2)[1];
-		} else {
-			alliesUser = message.mentions.members.first(1)[0];
-			axisUser = message.mentions.members.first(2)[1];
-		}
-
-		message.channel.send('Союзники :<@' + alliesUser.id + '> Ось: <@' + axisUser.id +'>');
-
-		let maps = mapsConst;
-		let answer = await select(message,maps,3,alliesUser,"Забань","забанил");
-		maps = maps.filter(x=> answer.indexOf(x)<0);
-		answer = await select(message,maps,2,axisUser,"Забань","забанил");
-		maps = maps.filter(x=> answer.indexOf(x)<0);
-
-		let map = random(maps);
-
-		message.channel.send('<@' + alliesUser.id + '> <@' + axisUser.id +'> Случайная карта: ' + map);
-
-		let alliesBan = await select(message,alliesConst,3,axisUser,"Забань","забанил");
-		let axisBan = await select(message,axisConst,2,alliesUser,"Забань","забанил");
-		let alliesList = alliesConst.filter(x => alliesBan.indexOf(x)<0);
-		let axisList = axisConst.filter(x => axisBan.indexOf(x)<0);
-		let alliesDiv = await select(message,alliesConst,1,alliesUser);
-		let axisDiv = await select(message,axisList,1,axisUser);
-
-		message.channel.send('Матч <@'+alliesUser.id+'> против <@'+axisUser.id+'> \n'+
-		'Карта: ' +map +'\n <@'+alliesUser.id+'> '+ alliesDiv + '\n <@'+axisUser.id+'> '+axisDiv);
-
+		setup(message);
 	}
+
 	if(message.content.startsWith("test")){
-		let maps = mapsConst;
-		select(message,maps,3);
+		
+		test(message);
 	}
+}
+
+async function test(message){
+	Util.confirm(message,message.author);
+
+}
+
+async function setup(message){
+
+	let firstPlayer;
+	let secondPlayer;
+
+	if(message.mentions.users.size >= 2){
+		firstPlayer = 	message.mentions.members.first(1)[0];
+		secondPlayer = message.mentions.members.first(2)[1];
+	} else {
+		message.reply("Нужно упомянуть 2 пользователей");
+		return;
+	}
+	
+	//random pick side
+	let firstSide = Util.random([0,1]);
+
+	let axisUser;
+	let alliesUser;
+
+	if(firstSide = 0){
+		axisUser = firstPlayer;
+		alliesUser = secondPlayer;
+	} else {
+		alliesUser = firstPlayer;
+		axisUser = secondPlayer;
+	}
+
+	message.channel.send('Союзники :<@' + alliesUser.id + '> Ось: <@' + axisUser.id +'>');
+
+	//allies bans 3 maps, axis bans 2 maps
+
+	let maps = mapsConst;
+	let answer = await Util.select(message,maps,3,alliesUser,"Забань","забанил");
+	maps = maps.filter(x=> answer.indexOf(x)<0);
+	answer = await Util.select(message,maps,2,axisUser,"Забань","забанил");
+	maps = maps.filter(x=> answer.indexOf(x)<0);
+
+	//random pick map from rest
+	let map = Util.random(maps);
+
+	message.channel.send('<@' + alliesUser.id + '> <@' + axisUser.id +'> Случайная карта: ' + map);
+
+	//axis bans 3 divisions, allies bans 2 divisions 
+
+	let alliesBan = await Util.select(message,alliesConst,3,axisUser,"Забань","забанил");
+	let axisBan = await Util.select(message,axisConst,2,alliesUser,"Забань","забанил");
+
+	//allies pick division then axis picks counterpick
+	let alliesList = alliesConst.filter(x => alliesBan.indexOf(x)<0);
+	let axisList = axisConst.filter(x => axisBan.indexOf(x)<0);
+	let alliesDiv = await Util.select(message,alliesConst,1,alliesUser);
+	let axisDiv = await Util.select(message,axisList,1,axisUser);
+
+	message.channel.send('Матч <@'+alliesUser.id+'> против <@'+axisUser.id+'> \n'+
+	'Карта: ' +map +'\n <@'+alliesUser.id+'> '+ alliesDiv + '\n <@'+axisUser.id+'> '+axisDiv);
 }
 
 client.on("message", process);
 
 
-async function select(_message,list,num = 1,user = _message.author, doStr = "Выбери",didStr= "выбрал") {
-	let reply = doStr+' '+num+' из \n';
-
-	list.reduce( (acc,cur,i) => acc.concat(emojis[i]+ ' '+ cur));
-	for(i in list){
-		reply = reply.concat(emojis[i]).concat(' ').concat(list[i]).concat('\n');
-	}
-	let replyMessage = await _message.channel.send("...");
-	for(i in list){
-		 await replyMessage.react(emojis[i]);
-	}
-	replyMessage.edit("<@"+user.id+">, "+reply);
-
-	let collector = replyMessage.createReactionCollector((reaction, mUser) => mUser.id === user.id);
-
-	let answer = new Array();
-	while(replyMessage.reactions.filter( reaction => reaction.users.has(user.id)).size<num){
-		let reaction = await collector.next;
-	}
-	replyMessage.reactions.filter( reaction => reaction.users.has(user.id)).forEach(reaction => answer.push(list[emojis.indexOf(reaction.emoji.name)]));
-
-	collector.stop();
-	replyMessage.clearReactions();
-	replyMessage.edit("<@"+user.id+"> "+didStr+" "+answer.join(", "));
-
-	return answer;
-}
 
 
-
-function random(array){
-	return array[Math.floor(Math.random()*array.length)];
-}
 
