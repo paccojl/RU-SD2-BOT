@@ -1,6 +1,6 @@
 const emojis = ["🇦","🇧","🇨","🇩","🇪","🇫","🇬","🇭","🇮","🇯","🇰","🇱","🇲","🇳","🇴","🇵","🇶","🇷","🇸","🇹","🇺","🇻","🇼","🇽","🇾"];
 
-async function select(message,list,num = 1,user = message.author, doStr = "Выбери",didStr= "выбрал", timeoutms=60000) {
+async function select(message,list,num = 1,users, doStr = "Выбери",didStr= "выбрал", timeoutms=10000) {
 
 	let	reply = ` ${doStr} ${num} из списка\n${list.map((e,i)=>{return `${emojis[i]} ${e}`}).join('\n')}`;
 
@@ -8,67 +8,66 @@ async function select(message,list,num = 1,user = message.author, doStr = "Вы�
 	for(i in list){
 		 await replyMessage.react(emojis[i]);
 	}
-	replyMessage.edit(`<@${user.id}>, ${reply}`);
+	
+	replyMessage.edit(`${users.map((u)=>{return `<@${u.id}>`}).join(' ')}, ${reply}`);
 
-	let collector = replyMessage.createReactionCollector((reaction, mUser) => mUser.id === user.id);
-
+	let collector = replyMessage.createReactionCollector((r, u) => users.includes(u));
 	try{
-		await Promise.race([waitForReactions(replyMessage,collector,user,num),timeout(timeoutms)]);
+		await new Promise(function(resolve,reject){
+			setTimeout(reject,timeoutms,`${users.map((u)=>{return `<@${u.id}>`}).join(' ')}, не ответил`);
+			collector.on("collect", ()=>{
+				if(replyMessage.reactions.filter((r)=> users.some((u)=>r.users.has(u.id))).size >= num){
+					resolve();
+				}
+			});
+		});
 	} catch(err){
 		replyMessage.delete();
-		throw `<@${user.id}> не ответил`;
+		throw err;
 	} finally {
 		collector.stop();
 	}
 
 	let answer = new Array();
-	replyMessage.reactions.filter( reaction => reaction.users.has(user.id)).first(num).forEach(reaction => answer.push(list[emojis.indexOf(reaction.emoji.name)]));
+	replyMessage.reactions.filter( reaction => users.some((u)=>reaction.users.has(u.id))).first(num).forEach(reaction => answer.push(list[emojis.indexOf(reaction.emoji.name)]));
 	
-	replyMessage.edit(`<@${user.id}> ${didStr} ${answer.join(", ")}`);
+	replyMessage.edit(`${users.map((u)=>{return `<@${u.id}>`}).join(' ')} ${didStr} ${answer.join(", ")}`);
 	replyMessage.clearReactions();
 	
 	return answer;
 }
 
-
-async function waitForReactions(message,collector,user,num){
-	while(message.reactions.filter(reaction => reaction.users.has(user.id)).size<num){
-		await collector.next;
-	}
-}
-
-function banSelect(message,list,num=1,user = message.author){
-	select(message,list,num,user,"Забань","забанил");
-}
-
-async function confirm(message,user,timeoutms = 30000){
+async function confirm(message,users,timeoutms = 30000){
 
 	let replyMessage = await message.channel.send("...");
 
 	await replyMessage.react("👍");
 	await replyMessage.react("👎");
 
-	replyMessage.edit(`<@${user.id}>, подтверди`);
+	replyMessage.edit(`${users.map(u=>{return `<@${u.id}>`}).join(` `)}, подтверди`);
 
-
-	let collector = replyMessage.createReactionCollector((reaction, mUser) => mUser.id === user.id);
-	let ret;
+	let collector = replyMessage.createReactionCollector((r, u) => users.includes(u));
 	try{
-		let reaction = await Promise.race([collector.next,timeout(timeoutms)]);
-		if(reaction.emoji.name === "👍") ret = true;
-		else if (reaction.emoji.name === "👎") ret = false;
+		await new Promise(function (resolve,reject){
+			setTimeout(reject,timeoutms,`истекло время ожидания`);
+			collector.on("collect", (r) => {
+				if(r.emoji.name === "👍" && users.every((u)=>r.users.has(u.id))){
+					resolve();
+				}
+				if(r.emoji.name === "👎" && users.some((u)=>r.users.has(u.id))){
+					reject(`${users.filter((u)=>r.users.has(u.id)).map((u)=>{return `<@${u.id}>`}).join(` `)} отказался`);
+				}
+			})
+		});
 	} catch(err) {
-		throw `<@${user.id}> не ответил`;
+		throw err;
 	} finally {
 		collector.stop();
 		await replyMessage.delete();
 	}
-	return ret;
+	return true;
 }
 
-function timeout(ms) {
-	return new Promise((_,reject) => setTimeout(reject,ms,"timeout"));
-}
 
 function random(array){
 	return array[Math.floor(Math.random()*array.length)];
@@ -76,6 +75,6 @@ function random(array){
 
 
 module.exports.select = select;
-module.exports.banSelect = banSelect;
+//module.exports.banSelect = banSelect;
 module.exports.confirm = confirm;
 module.exports.random = random;
