@@ -1,66 +1,88 @@
 {
-	"maps":
-	[
-		"Bois de Limors",
-		"Carpiquet",
-		"Carpiquet Duellist",
-		"Caumont L'Evente",
-		"Cheux",
-		"Colleville",
-		"Colombelles",
-		"Cote 112",
-		"Merderet",
-		"Mont Ormel",
-		"Odon",
-		"Odon River",
-		"Omaha",
-		"Pegasus Bridge",
-		"Pointe du Hoc",
-		"Saint-Mere-Eglise",
-		"Saint-Mere-Eglise Duellists"
-	],
+	"maps":{
+		"2": [
+			"Bobr",
+			"Haroshaje",
+			"Krupa",
+			"Lenina",
+			"Orsha East",
+			"Orsha North",
+			"Ostrowno",
+			"Shchedrin",
+			"Sianno",
+			"Slutsk East",
+			"Slutsk West",
+			"Slutsk",
+			"Tsel"
+		],
+		"4" : [
+			"Autobahn Zur Holle",
+			"Beshankovichy",
+			"Bobrujsk West",
+			"Lenina",
+			"Losnica",
+			"Novka",
+			"Ostrowno",
+			"Shchedrin",
+			"Slutsk",
+			"Veselovo",
+			"Vitebsk East"
+		],
+		"6" : [
+			"Krupki",
+			"Lenina",
+			"Lipen",
+			"Lyakhavichy",
+			"Mogilev",
+			"Naratch Lake",
+			"Ostrowno",
+			"Pleshchenitsy South",
+			"Shchedrin",
+			"Slutsk",
+			"Smolyany"
+		],
+		"8" : [
+			"Lenina",
+			"Ostrowno",
+			"Shchedrin",
+			"Slutsk"
+		]
+	}
+	,
 
 	"allydivs":
 	[
-		"3rd Armoured",
-		"4th Armoured",
-		"101st Airborne",
-		"2nd Infantry",
-		"2e Blindee",
-		"Demi-Brigade SAS",
-		"7th Armoured",
-		"Guards Armoured",
-		"6th Airborne",
-		"15th Infantry",
-		"1st SSB",
+		"2-ya Gvard. Tankovy Korpus",
+		"29-ya Tankovy Korpus",
+		"3-ya Gvard. Tankovy Korpus",
+		"3-ya Gvard. Mechanizi. Korpus",
+		"Podv. Gruppa Tyurina",
+		"Podv. Gruppa Bezuglogo",
+		"9-ya Gvard. Kavalerii",
+		"26-ya Gvard. Strelkovy",
+		"44-ya Gvard. Strelkovy",
+		"184-ya Strelkovy",
+		"3rd US Armoured",
 		"3rd Canadian Infantry",
-		"1 Pancerna",
-		"1st Infantry"
+		"15th Infantry",
+		"2e Blindée"
 	],
 
 	"axisdivs":
 	[
-		"Panzer-Lehr",
-		"12. SS-Panzer",
-		"1. SS-Panzer",
-		"2. Panzer",
-		"9. Panzer",
+		"5. Panzer",
+		"20. Panzer",
+		"78. Sturm",
+		"28. Jäger",
+		"14. Infanterie",
+		"Gruppe Harteneck",
+		"Korück 559",
+		"1. Lovas",
+		"12. Tartalék",
 		"21. Panzer",
+		"Panzer Lehr",
 		"116. Panzer",
-		"17. SS-Panzergrenadier",
-		"3. Fallschirmjager",
-		"16. Luftwaffe",
-		"91. Luftlande",
-		"Festung Gross-Paris",
-		"352. Infanterie",
-		"716. Infanterie"
-	],
-
-	"opdivs":
-	[
-		"4th Armoured",
-		"7th Armoured",
-		"1. SS-Panzer",
-		"2. Panzer"
+		"352. Infantrie",
+		"1. Skijäger"
 	]
 }	
