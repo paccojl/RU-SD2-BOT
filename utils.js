@@ -1,8 +1,8 @@
 const emojis = ["🇦","🇧","🇨","🇩","🇪","🇫","🇬","🇭","🇮","🇯","🇰","🇱","🇲","🇳","🇴","🇵","🇶","🇷","🇸","🇹","🇺","🇻","🇼","🇽","🇾"];
 
-async function select(message,list,num = 1,users, doStr = "Выбери",didStr= "выбрал", timeoutms=60000) {
+async function select(message,list,num = 1,users,description ='', timeoutms=60000) {
 
-	let	reply = ` ${doStr} ${num} из списка\n${list.map((e,i)=>{return `${emojis[i]} ${e}`}).join('\n')}`;
+	let	reply = `${description}\n Выбери ${num} из списка\n${list.map((e,i)=>{return `${emojis[i]} ${e}`}).join('\n')}`;
 
 	let replyMessage = await message.channel.send("...");
 	for(i in list){
@@ -31,7 +31,7 @@ async function select(message,list,num = 1,users, doStr = "Выбери",didStr=
 	let answer = new Array();
 	replyMessage.reactions.filter( reaction => users.some((u)=>reaction.users.has(u.id))).first(num).forEach(reaction => answer.push(list[emojis.indexOf(reaction.emoji.name)]));
 	
-	replyMessage.edit(`${users.map((u)=>{return `<@${u.id}>`}).join(' ')} ${didStr} ${answer.join(", ")}`);
+	replyMessage.edit(`${description}\n${users.map((u)=>{return `<@${u.id}>`}).join(' ')} выбрал ${answer.join(", ")}`);
 	replyMessage.clearReactions();
 	
 	return answer;
@@ -72,6 +72,8 @@ async function confirm(message,users,description = `подтвердите`,time
 function random(array){
 	return array[Math.floor(Math.random()*array.length)];
 }
+
+
 
 
 module.exports.select = select;

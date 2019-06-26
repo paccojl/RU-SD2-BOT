@@ -13,6 +13,7 @@ const sql = require("./sql.js");
 client.login(config.token);
 
 client.on('ready' , () => {
+	//test();
 });
 
 
@@ -49,12 +50,28 @@ function process(message) {
 
 async function test(message){
 	//sql.recalcRating();
+
+
+	console.log((await getMentionsArray(message)).filter(u => u.bot == false));
+	
+
+}
+
+async function getMentionsArray(message){
+	let regexp = /<@!?(\d+)>/g;
+	let list = new Array();
+	while( match = regexp.exec(message.content)){
+		list.push(await client.fetchUser(match[1]));
+	}
+	return list;
 }
 
 
 async function setup(message){
 
-	let size = Math.ceil(message.mentions.users.array().length / 2);
+	let orderedMentions = (await getMentionsArray(message)).filter(u => u.bot == false);
+
+	let size = Math.ceil(orderedMentions.length / 2);
 	if(size>4){
 		message.reply(`максимальный размер матча 4 на 4`);
 		return;
@@ -62,11 +79,12 @@ async function setup(message){
 	if(!message.mentions.users.has(message.author.id)){
 		message.reply(`Необходимо упомянуть себя, только администраторы могут создавать матчи без своего участия`);
 	}
+
 	let teamOne;
 	let teamTwo;
-	if(message.mentions.users.size == size*2){
-		teamOne = message.mentions.users.array().slice(0,size);
-		teamTwo = message.mentions.users.array().slice(size);
+	if(orderedMentions == size*2){
+		teamOne = orderedMentions.slice(0,size);
+		teamTwo = orderedMentions.slice(size);
 	} else{
 		message.reply(`Необходимо упомянуть ${size*2} пользователей`);
 		return;
@@ -105,11 +123,11 @@ ${teamTwo.map(u=>{return `<@${u.id}>`}).join(' ')}` ,60000);
 		let mapBans = new Array(0);
 
 		if(size < 4){
-			let answer = await Util.select(message,maps,2,alliesTeam);
+			let answer = await Util.select(message,maps,2,alliesTeam,"Союзники банят 2 карты");
 			maps = maps.filter(x=> answer.indexOf(x)<0);
 			mapBans.push(answer);
 
-			answer = await Util.select(message,maps,2,axisTeam);
+			answer = await Util.select(message,maps,2,axisTeam,"Ось банит 2 карты");
 			maps = maps.filter(x=> answer.indexOf(x)<0);
 			mapBans.push(answer);
 		}
@@ -120,8 +138,8 @@ ${teamTwo.map(u=>{return `<@${u.id}>`}).join(' ')}` ,60000);
 		message.channel.send(`Случайная карта: ${map}`);
 
 		//баны дивизий
-		let alliesBan = await Util.select(message, alliesConst, 2, axisTeam);
-		let axisBan = await Util.select(message, axisConst, 2, alliesTeam);
+		let alliesBan = await Util.select(message, alliesConst, 2, axisTeam,"Ось банит 2 дивизии Союзников");
+		let axisBan = await Util.select(message, axisConst, 2, alliesTeam,"Союзники банят 2 дивизии Оси");
 
 		let alliesAvalibleList = alliesConst.filter(x => alliesBan.indexOf(x)<0);
 		let axisAvalibleList = axisConst.filter(x => axisBan.indexOf(x)<0);
@@ -130,9 +148,9 @@ ${teamTwo.map(u=>{return `<@${u.id}>`}).join(' ')}` ,60000);
 
 		//выбор дивизий
 		for(let i=0;i<size;i++){
-			let div = await Util.select(message, axisAvalibleList, 1, [axisTeam[i]] );
+			let div = await Util.select(message, axisAvalibleList, 1, [axisTeam[i]],"Выбор дивизии для матча");
 			
-			let div2 = await Util.select(message, alliesAvalibleList, 1, [alliesTeam[i]] );
+			let div2 = await Util.select(message, alliesAvalibleList, 1, [alliesTeam[i]],"Выбор дивизии для матча");
 
 			sidesArray.push({ id: axisTeam[i].id, side: 1, division: div[0] });
 			sidesArray.push({ id: alliesTeam[i].id, side: 0, division: div2[0] });
