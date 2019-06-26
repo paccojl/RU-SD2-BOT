@@ -1,6 +1,6 @@
 const emojis = ["🇦","🇧","🇨","🇩","🇪","🇫","🇬","🇭","🇮","🇯","🇰","🇱","🇲","🇳","🇴","🇵","🇶","🇷","🇸","🇹","🇺","🇻","🇼","🇽","🇾"];
 
-async function select(message,list,num = 1,users, doStr = "Выбери",didStr= "выбрал", timeoutms=10000) {
+async function select(message,list,num = 1,users, doStr = "Выбери",didStr= "выбрал", timeoutms=60000) {
 
 	let	reply = ` ${doStr} ${num} из списка\n${list.map((e,i)=>{return `${emojis[i]} ${e}`}).join('\n')}`;
 
@@ -37,21 +37,21 @@ async function select(message,list,num = 1,users, doStr = "Выбери",didStr=
 	return answer;
 }
 
-async function confirm(message,users,timeoutms = 30000){
+async function confirm(message,users,description = `подтвердите`,timeoutms = 30000, required = users.length){
 
 	let replyMessage = await message.channel.send("...");
 
 	await replyMessage.react("👍");
 	await replyMessage.react("👎");
 
-	replyMessage.edit(`${users.map(u=>{return `<@${u.id}>`}).join(` `)}, подтверди`);
+	replyMessage.edit(/*`${users.map(u=>{return `<@${u.id}>`}).join(` `)}*/`${description}`);
 
-	let collector = replyMessage.createReactionCollector((r, u) => users.includes(u));
+	let collector = replyMessage.createReactionCollector((r, u) => users.map(u=>u.id).includes(u.id));
 	try{
 		await new Promise(function (resolve,reject){
 			setTimeout(reject,timeoutms,`истекло время ожидания`);
 			collector.on("collect", (r) => {
-				if(r.emoji.name === "👍" && users.every((u)=>r.users.has(u.id))){
+				if(r.emoji.name === "👍" && users.filter((u)=>r.users.has(u.id)).length >= required){
 					resolve();
 				}
 				if(r.emoji.name === "👎" && users.some((u)=>r.users.has(u.id))){
@@ -75,6 +75,5 @@ function random(array){
 
 
 module.exports.select = select;
-//module.exports.banSelect = banSelect;
 module.exports.confirm = confirm;
 module.exports.random = random;
