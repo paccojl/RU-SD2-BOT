@@ -100,39 +100,47 @@ async function commit(matchid,result){
 }
 
 async function getStats(message,user){
-    let main = await select1Query(`select * from players where id = ${user.id}`);
-    let games = await selectQuery(`select * from sides join matches on matches.rowid = sides.matchid where sides.playerid = ${user.id}; `);
-    let gamesCount = games.length;
-    let gamesCount1v1 = games.filter(g=>g.size == 1).length;
-    let gamesCount2v2 = games.filter(g=>g.size == 2).length;
-    let gamesCountTeam = games.filter(g=>g.size > 2).length;
-    let gamesWin1v1 = games.filter(g=> g.side == g.result && g.size == 1).length;
-    let gamesWin2v2 = games.filter(g=> g.side == g.result && g.size == 2).length;
-    let gamesWinTeam = games.filter(g=> g.side == g.result && g.size > 2).length;
-    message.reply(`
+    try{
+        let main = await select1Query(`select * from players where id = ${user.id}`);
+        let games = await selectQuery(`select * from sides join matches on matches.rowid = sides.matchid where sides.playerid = ${user.id}; `);
+        let rank1v1 = (await select1Query(`select rank from (select dense_rank() over (order by elo1v1 desc) as rank, id from players) where id = ${user.id}`)).rank;
+        let rank2v2 = (await select1Query(`select rank from (select dense_rank() over (order by elo2v2 desc) as rank, id from players) where id = ${user.id}`)).rank;
+        let rankTeam = (await select1Query(`select rank from (select dense_rank() over (order by eloTeam desc) as rank, id from players) where id = ${user.id}`)).rank;
+        let gamesCount = games.length;
+        let gamesCount1v1 = games.filter(g=>g.size == 1).length;
+        let gamesCount2v2 = games.filter(g=>g.size == 2).length;
+        let gamesCountTeam = games.filter(g=>g.size > 2).length;
+        let gamesWin1v1 = games.filter(g=> g.side == g.result && g.size == 1).length;
+        let gamesWin2v2 = games.filter(g=> g.side == g.result && g.size == 2).length;
+        let gamesWinTeam = games.filter(g=> g.side == g.result && g.size > 2).length;
+        message.reply(`\`\`\`
 Всего игр: ${gamesCount}
 Текущий матч: ${main.currentmatch==null?'нет':`%${main.currentmatch}`}
 ---1v1---
 ELO: ${main.elo1v1}
+Место в рейтинге: ${rank1v1}
 Побед: ${gamesWin1v1}
 Поражений: ${gamesCount1v1-gamesWin1v1}
 %: ${(gamesWin1v1/gamesCount1v1)*100}%
 ---2v2---
 ELO: ${main.elo2v2}
+Место в рейтинге: ${rank2v2}
 Побед: ${gamesWin2v2}
 Поражений: ${gamesCount2v2-gamesWin2v2}
 %: ${(gamesWin2v2/gamesCount2v2)*100}%
 ---Коммандные---
 ELO: ${main.eloTeam}
+Место в рейтинге: ${rankTeam}
 Побед: ${gamesWinTeam}
 Поражений: ${gamesCountTeam-gamesWinTeam}
-%: ${(gamesWinTeam/gamesCountTeam)*100}%
-`)
+%: ${(gamesWinTeam/gamesCountTeam)*100}%\`\`\``);
+        } catch (err){
+            message.reply(err);
+        }
+    
 }
 
 async function updateRating(allies,axis,result,size){ 
-
-
 
     let aliesaverage = allies.reduce((acc,p)=> acc+p.elo,0) / allies.length;    
     let axisaverage = axis.reduce((acc,p)=> acc+p.elo,0) / axis.length;
@@ -166,6 +174,21 @@ async function recalcRating(){
     }
 }
 
+async function leaderboard(message,size,num = 10){
+    let client = message.client;
+    let eloname = sizeToEloName(size);
+    let board = await selectQuery(`select dense_rank() over (order by ${eloname} desc) as rank, ${eloname} as elo, cast(id as text) as id from players limit ${num}`);
+    let reply = '';
+    for(e of board){
+        reply += `${e.rank.toString().padStart(5)} | ${e.elo.toString().padEnd(9)}| ${(await client.fetchUser(e.id)).username}\n`;
+    }
+    message.channel.send(`\`\`\`Rank ${size}v${size}\n${reply}\`\`\``);
+    
+}
+
+function sizeToEloName(size){
+    return (size == 1)?`elo1v1`:(size==2)?`elo2v2`:`eloTeam`;
+}
 
 //promise wraps on database methods
 
@@ -243,4 +266,5 @@ module.exports.regMatch = regMatch;
 module.exports.getPlayerCurrentMatch = getPlayerCurrentMatch;
 module.exports.getStats = getStats;
 module.exports.recalcRating = recalcRating;
+module.exports.leaderboard = leaderboard;
 

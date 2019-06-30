@@ -28,7 +28,7 @@ function process(message) {
 			test(message);
 		}
 	
-		if(message.content.startsWith("$reg")){
+		if(message.content.startsWith("$register")){
 			sql.register(message);
 		}
 		if(message.content.startsWith("unreg")){
@@ -42,6 +42,15 @@ function process(message) {
 		}
 		if(message.content.startsWith("$stats")){
 			sql.getStats(message,message.author);
+		}
+		if(message.content.startsWith("$leaderboard1v1")){
+			sql.leaderboard(message,1);
+		}
+		if(message.content.startsWith("$leaderboard2v2")){
+			sql.leaderboard(message,2);
+		}
+		if(message.content.startsWith("$leaderboardTeam")){
+			sql.leaderboard(message,3);
 		}
 	}
 }
