@@ -1,3 +1,15 @@
+/*
+CREATE TABLE players(
+id integer primary key, currentmatch REFERENCES matches(id) ON DELETE SET NULL, elo1v1 real, elo2v2 real, eloTeam real);
+CREATE TABLE sides (matchid REFERENCES matches(id) ON DELETE CASCADE, playerid integer, side integer, division integer);
+CREATE TABLE divbans
+(matchid REFERENCES matches(id) ON DELETE CASCADE, playerid integer, division integer);
+CREATE TABLE mapbans
+(matchid REFERENCES matches(id) ON DELETE CASCADE, playerid integer, map integer);
+CREATE TABLE matches
+(id integer primary key, map integer, date text, dateCommit text , result integer, size integer);
+*/
+
 const sqlite3 = require('sqlite3').verbose();
 const tables = require("./tables");
 const mapsConst = tables.maps;
@@ -7,7 +19,7 @@ const divConst = [tables.allydivs, tables.axisdivs];
 async function register(message){
     let user = message.author;
     try{
-        await runQuery(`insert into players(id,elo1v1,elo2v2,eloTeam) values (${user.id},1500,1500,1500)`);
+        await runQuery(`insert into players(id) values (${user.id})`);
         message.channel.send(`<@${user.id}> добро пожаловать!`);
     } catch (err){
         if(err.message === "SQLITE_CONSTRAINT: UNIQUE constraint failed: players.id"){
@@ -18,8 +30,37 @@ async function register(message){
     }
 } 
 
+async function unregister(message){
+    if(message.mentions.users.size != 1){
+        return;
+    }
+    let user = message.mentions.users.first();
+    try{
+        await runQuery(`delete from matches where exists(select * from sides where playerid = ${user.id} and matchid = matches.id)`);
+        await runQuery(`delete from players where id = ${user.id}`);
+        await recalcRating();
+        message.reply(`Игрок <@${user.id}> удалён из базы данных. Все матчи с его участием удалены. Рейтинг остальных игроков пересчитан.`)
+    } catch (err){
+        message.reply("Ошибка:"+err);
+    }
+}
+
+async function deleteMatch(message){
+    if(message.content.test(/no(\d+)/)){
+        let matchid = Number.parseInt(message.content.match(/no(\d+)/)[1]);
+        try{
+            await runQuery(`delete form matches where id = ${matchid}`);
+            await recalcRating();
+        } catch (err){
+            message.reply("Ошибка:"+err);
+        }
+    } else {
+        message.reply("Неправильный формат")
+    }
+}
+
 async function regMatch(size,sides,map,mapBans,alliesBans,axisBans){
-    let matchId = await runQuery(`insert into matches(map,size) values (${map},${size})`);
+    let matchId = await runQuery(`insert into matches(map,size,date) values (${map},${size},datetime('now'))`);
 
     let sidesvalues = sides.map((p)=>{return `(${matchId},${p.id},${p.side},${divConst[p.side].indexOf(p.division)})`}).join(',');
 
@@ -42,9 +83,9 @@ async function regMatch(size,sides,map,mapBans,alliesBans,axisBans){
 }
 
 async function getMatchSides(matchId){
-    let match = await select1Query(`select size from matches where rowid = ${matchId}`);
+    let match = await select1Query(`select size from matches where id = ${matchId}`);
     let eloname = (match.size == 1)?`elo1v1`:(match.size==2)?`elo2v2`:`eloTeam`;          
-    let players = await selectQuery(`select cast(playerid as text) as id, side, division, ${eloname} as elo from sides join players on sides.playerid = players.id where matchid = ${matchId}`);
+    let players = await selectQuery(`select cast(playerid as text) as id, side, division, ifnull(${eloname},1500) as elo from sides join players on sides.playerid = players.id where matchid = ${matchId}`);
     return await players;
 
 }
@@ -95,17 +136,17 @@ async function setElo(user,size,newElo){
 }
 
 async function commit(matchid,result){
-    await runQuery(`update matches set result = ${result}, date = datetime('now') where rowid = ${matchid}`);
+    await runQuery(`update matches set result = ${result}, dateCommit = datetime('now') where id = ${matchid}`);
     await runQuery(`update players set currentmatch = null where currentmatch = ${matchid}`);
 }
 
 async function getStats(message,user){
     try{
         let main = await select1Query(`select * from players where id = ${user.id}`);
-        let games = await selectQuery(`select * from sides join matches on matches.rowid = sides.matchid where sides.playerid = ${user.id}; `);
-        let rank1v1 = (await select1Query(`select rank from (select dense_rank() over (order by elo1v1 desc) as rank, id from players) where id = ${user.id}`)).rank;
-        let rank2v2 = (await select1Query(`select rank from (select dense_rank() over (order by elo2v2 desc) as rank, id from players) where id = ${user.id}`)).rank;
-        let rankTeam = (await select1Query(`select rank from (select dense_rank() over (order by eloTeam desc) as rank, id from players) where id = ${user.id}`)).rank;
+        let games = await selectQuery(`select * from sides join matches on matches.id = sides.matchid where sides.playerid = ${user.id}; `);
+        let rank1v1 = (await select1Query(`select rank from (select dense_rank() over (order by elo1v1 desc) as rank, id from players where elo1v1 is not null) where id = ${user.id}`));
+        let rank2v2 = (await select1Query(`select rank from (select dense_rank() over (order by elo2v2 desc) as rank, id from players where elo2v2 is not null) where id = ${user.id}`));
+        let rankTeam = (await select1Query(`select rank from (select dense_rank() over (order by eloTeam desc) as rank, id from players where eloTeam is not null) where id = ${user.id}`));
         let gamesCount = games.length;
         let gamesCount1v1 = games.filter(g=>g.size == 1).length;
         let gamesCount2v2 = games.filter(g=>g.size == 2).length;
@@ -118,19 +159,19 @@ async function getStats(message,user){
 Текущий матч: ${main.currentmatch==null?'нет':`%${main.currentmatch}`}
 ---1v1---
 ELO: ${main.elo1v1}
-Место в рейтинге: ${rank1v1}
+Место в рейтинге: ${rank1v1?rank1v1.rank:"null"}
 Побед: ${gamesWin1v1}
 Поражений: ${gamesCount1v1-gamesWin1v1}
 %: ${(gamesWin1v1/gamesCount1v1)*100}%
 ---2v2---
 ELO: ${main.elo2v2}
-Место в рейтинге: ${rank2v2}
+Место в рейтинге: ${rank2v2?rank2v2.rank:"null"}
 Побед: ${gamesWin2v2}
 Поражений: ${gamesCount2v2-gamesWin2v2}
 %: ${(gamesWin2v2/gamesCount2v2)*100}%
 ---Коммандные---
 ELO: ${main.eloTeam}
-Место в рейтинге: ${rankTeam}
+Место в рейтинге: ${rankTeam?rankTeam.rank:"null"}
 Побед: ${gamesWinTeam}
 Поражений: ${gamesCountTeam-gamesWinTeam}
 %: ${(gamesWinTeam/gamesCountTeam)*100}%\`\`\``);
@@ -162,8 +203,8 @@ async function updateRating(allies,axis,result,size){
 }
 
 async function recalcRating(){
-    let games = await selectQuery(`select rowid as id, result from matches where result IS NOT NULL order by datetime(date)`);
-    await runQuery(`update players set elo1v1 = 1500, elo2v2 = 1500, eloTeam = 1500`);
+    let games = await selectQuery(`select id, result from matches where result IS NOT NULL order by datetime(dateCommit)`);
+    await runQuery(`update players set elo1v1 = null, elo2v2 = null, eloTeam = null`);
     
 
     for(game of games){
@@ -177,7 +218,7 @@ async function recalcRating(){
 async function leaderboard(message,size,num = 10){
     let client = message.client;
     let eloname = sizeToEloName(size);
-    let board = await selectQuery(`select dense_rank() over (order by ${eloname} desc) as rank, ${eloname} as elo, cast(id as text) as id from players limit ${num}`);
+    let board = await selectQuery(`select dense_rank() over (order by ${eloname} desc) as rank, ${eloname} as elo, cast(id as text) as id from players where ${eloname} is not null limit ${num}`);
     let reply = '';
     for(e of board){
         reply += `${e.rank.toString().padStart(5)} | ${e.elo.toString().padEnd(9)}| ${(await client.fetchUser(e.id)).username}\n`;
@@ -258,6 +299,8 @@ function runQuery(query){
 }
 
 module.exports.register = register;
+module.exports.unregister = unregister;
+module.exports.deleteMatch=deleteMatch;
 module.exports.getMatchSides = getMatchSides;
 module.exports.updateRating = updateRating;
 module.exports.commit = commit;

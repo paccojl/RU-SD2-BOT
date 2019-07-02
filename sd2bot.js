@@ -19,21 +19,36 @@ client.on('ready' , () => {
 
 
 function process(message) {
-	if(message.channel.type === 'text'){
+	if(message.channel.type === 'text' && message.channel.name === "ru-sd-bot"){
 		if(message.content.startsWith("$setup")){
 			setup(message);
 		}
 	
-		if(message.content.startsWith("test")){
-			test(message);
-		}
+		//if(message.content.startsWith("$test")){
+		//	test(message);
+		//}
 	
 		if(message.content.startsWith("$register")){
 			sql.register(message);
 		}
-		if(message.content.startsWith("unreg")){
-			sql.unreg(message);
+
+		if(message.content.startsWith("$unregister")){
+			if(isAdmin(message.author)){
+				sql.unregister(message);
+			}
 		}
+
+		if(message.content.startsWith("$forceCommit")){
+			if(isAdmin(message.author)){
+				forceCommit(message);
+			}
+		}
+		if(message.content.startsWith("$deleteMatch")){
+			if(isAdmin(message.author)){
+				sql.deleteMatch(message);
+			}
+		}
+
 		if(message.content.startsWith("$commitWin")){
 			commit(message,1);
 		}
@@ -55,13 +70,17 @@ function process(message) {
 	}
 }
 
+function isAdmin(user){
+	return config.adminList.includes(user.id);
+}
+
 
 
 async function test(message){
 	//sql.recalcRating();
 
 
-	console.log((await getMentionsArray(message)).filter(u => u.bot == false));
+	console.log(Number.parseInt(message.content.match(/no(\d+)/)[1]));
 	
 
 }
@@ -85,7 +104,7 @@ async function setup(message){
 		message.reply(`максимальный размер матча 4 на 4`);
 		return;
 	}
-	if(!message.mentions.users.has(message.author.id)){
+	if(!message.mentions.users.has(message.author.id) && !isAdmin(message.author)){
 		message.reply(`Необходимо упомянуть себя, только администраторы могут создавать матчи без своего участия`);
 	}
 
@@ -134,11 +153,11 @@ ${teamTwo.map(u=>{return `<@${u.id}>`}).join(' ')}` ,60000);
 		if(size < 4){
 			let answer = await Util.select(message,maps,2,alliesTeam,"Союзники банят 2 карты");
 			maps = maps.filter(x=> answer.indexOf(x)<0);
-			mapBans.push(answer);
+			mapBans.push(...answer);
 
 			answer = await Util.select(message,maps,2,axisTeam,"Ось банит 2 карты");
 			maps = maps.filter(x=> answer.indexOf(x)<0);
-			mapBans.push(answer);
+			mapBans.push(...answer);
 		}
 		
 		//выбрать случайную из оставшихся
@@ -185,6 +204,17 @@ ${sidesArray.filter(e=>{return e.side === 1}).map(e=>{return `<@${e.id}> : ${e.d
 		message.channel.send(`${err}, матч отменён`);
 		return;
 	}
+}
+
+async function forceCommit(message){
+	if(message.content.test(/no(\d+)/) && message.content.test(/res(\d+)/)){
+		let matchid = Number.parseInt(message.content.match(/no(\d+)/)[1]);
+		let result = Number.parseInt(message.content.test(/res(\d+)/)[1]);
+
+		sql.commit(matchid,result);
+		sql.recalcRating();
+	}
+
 }
 
 
