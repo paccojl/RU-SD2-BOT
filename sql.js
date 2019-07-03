@@ -138,6 +138,8 @@ async function setElo(user,size,newElo){
 async function commit(matchid,result){
     await runQuery(`update matches set result = ${result}, dateCommit = datetime('now') where id = ${matchid}`);
     await runQuery(`update players set currentmatch = null where currentmatch = ${matchid}`);
+    let players = await getMatchSides(matchid);
+    return await updateRating(players.filter(p => p.side==0),players.filter(p=>p.side == 1), result, players.length/2 );
 }
 
 async function getStats(message,user){
@@ -302,7 +304,6 @@ module.exports.register = register;
 module.exports.unregister = unregister;
 module.exports.deleteMatch=deleteMatch;
 module.exports.getMatchSides = getMatchSides;
-module.exports.updateRating = updateRating;
 module.exports.commit = commit;
 module.exports.canPlay = canPlay;
 module.exports.regMatch = regMatch;

@@ -211,8 +211,11 @@ async function forceCommit(message){
 		let matchid = Number.parseInt(message.content.match(/no(\d+)/)[1]);
 		let result = Number.parseInt(message.content.test(/res(\d+)/)[1]);
 
-		sql.commit(matchid,result);
-		sql.recalcRating();
+		let changes = sql.commit(matchid,result);
+		message.channel.send(`Результат матча №${matchid} подтверждён администратором!
+Выигравшая сторона: ${result==0?'Союзники':'Ось'}
+Изменения в рейтинге:
+${changes.map(p =>{return `<@${p.id}> ${p.elo} => ${p.newElo}`}).join('\n')}`);
 	}
 
 }
@@ -235,9 +238,7 @@ async function commit(message,wl){
 
 			if(await Util.confirm(message,playersToConfirm,description,60000,1)){
 
-				sql.commit(matchid,result);
-
-				let eloChanges = await sql.updateRating(players.filter(p => p.side==0),players.filter(p=>p.side == 1), result, players.length/2 );
+				let eloChanges = await sql.commit(matchid,result);
 
 				message.channel.send(`Результат матча №${matchid} подтверждён!
 Выигравшая сторона: ${result==0?'Союзники':'Ось'}
