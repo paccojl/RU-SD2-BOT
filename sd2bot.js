@@ -52,9 +52,9 @@ function process(message) {
 		if(message.content.startsWith("$commitWin")){
 			commit(message,1);
 		}
-		if(message.content.startsWith("$commitLose")){
-			commit(message,0);
-		}
+		//if(message.content.startsWith("$commitLose")){
+		//	commit(message,0);
+		//}
 		if(message.content.startsWith("$stats")){
 			sql.getStats(message,message.author);
 		}
@@ -66,6 +66,17 @@ function process(message) {
 		}
 		if(message.content.startsWith("$leaderboardTeam")){
 			sql.leaderboard(message,3);
+		}
+		if(message.content.startsWith("$help")){
+			message.reply('**$rules** - Правила рейтинга\n'+
+			'**$stats** - личная статистика\n'+
+			'**$leaderboard1v1\\2v2\\Team** - Таблица рейтинга\n'+
+			'**$register** - зарегистрироваться в рейтинге\n'+
+			'**$setup <список игроков>** - собрать рейтинговую игру\n'+
+			'**$setupnotrank <список игроков>** - собрать игру без записи в базу рейтинга')
+		}
+		if(message.content.startsWith("$rules")){
+			message.reply('N/A')//TODO
 		}
 	}
 }

@@ -8,6 +8,8 @@ CREATE TABLE mapbans
 (matchid REFERENCES matches(id) ON DELETE CASCADE, playerid integer, map integer);
 CREATE TABLE matches
 (id integer primary key, map integer, date text, dateCommit text , result integer, size integer);
+CREATE TABLE banlist
+(id integer primary key, date text, lastUsername text);
 */
 
 const sqlite3 = require('sqlite3').verbose();
@@ -51,6 +53,7 @@ async function deleteMatch(message){
         try{
             await runQuery(`delete form matches where id = ${matchid}`);
             await recalcRating();
+            message.channel.send(`Матч №${matchid} отменён/удалён. Рейтинг пересчитан без учёта данного матча.`)
         } catch (err){
             message.reply("Ошибка:"+err);
         }
@@ -105,7 +108,7 @@ async function getPlayerCurrentMatch(user){
         let matchId = (await select1Query(`select currentmatch from players where id = ${user.id}`)).currentmatch;
         return matchId;
     } catch (err){
-        throw `<@${user.id}> не зарегистрирован`;
+        throw `<@${user.id}> не зарегистрирован(Используйте команду $register)`;
     }
     
     
