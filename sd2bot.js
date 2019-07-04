@@ -13,7 +13,7 @@ const sql = require("./sql.js");
 client.login(config.token);
 
 client.on('ready' , () => {
-	//test();
+	client.user.setActivity('ваши команды', { type: 'LISTENING' })
 });
 
 
@@ -267,6 +267,9 @@ ${eloChanges.map(p =>{return `<@${p.id}> ${p.elo} => ${p.newElo}`}).join('\n')}`
 }
 
 client.on("message", process);
+
+client.on("error", (err)=> console.log(err));
+
 
 
 
