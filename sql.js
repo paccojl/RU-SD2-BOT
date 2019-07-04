@@ -9,7 +9,7 @@ CREATE TABLE mapbans
 CREATE TABLE matches
 (id integer primary key, map integer, date text, dateCommit text , result integer, size integer);
 CREATE TABLE banlist
-(id integer primary key, date text, lastUsername text);
+(id integer primary key, date text, username text);
 */
 
 const sqlite3 = require('sqlite3').verbose();
@@ -20,6 +20,9 @@ const divConst = [tables.allydivs, tables.axisdivs];
 
 async function register(message){
     let user = message.author;
+    if(isBanned(user.id)){
+        message.channel.send(`<@${user.id}> заблокирован!`)
+    }
     try{
         await runQuery(`insert into players(id) values (${user.id})`);
         message.channel.send(`<@${user.id}> добро пожаловать!`);
@@ -40,11 +43,16 @@ async function unregister(message){
     try{
         await runQuery(`delete from matches where exists(select * from sides where playerid = ${user.id} and matchid = matches.id)`);
         await runQuery(`delete from players where id = ${user.id}`);
+        await runQuery(`insert into banlist(id,date,username) values (${user.id},datetime('now'),${user.username})`)
         await recalcRating();
         message.reply(`Игрок <@${user.id}> удалён из базы данных. Все матчи с его участием удалены. Рейтинг остальных игроков пересчитан.`)
     } catch (err){
         message.reply("Ошибка:"+err);
     }
+}
+
+async function isBanned(userid){
+    return new Boolean(await select1Query(`select * from banlist where id = ${userid}`));
 }
 
 async function deleteMatch(message){
