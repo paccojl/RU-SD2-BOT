@@ -22,11 +22,11 @@ function process(message) {
 	if(message.channel.type === 'text' && message.channel.name === "ru-sd-bot"){
 		if(message.content.startsWith("$setup")){
 			setup(message);
+		} 
+
+		if(message.content.startsWith("$noranksetup")){
+			setup(message,false);
 		}
-	
-		//if(message.content.startsWith("$test")){
-		//	test(message);
-		//}
 	
 		if(message.content.startsWith("$register")){
 			sql.register(message);
@@ -68,12 +68,12 @@ function process(message) {
 			sql.leaderboard(message,3);
 		}
 		if(message.content.startsWith("$help")){
-			message.reply('**$rules** - Правила рейтинга\n'+
+			message.reply(//'**$rules** - Правила рейтинга\n'+
 			'**$stats** - личная статистика\n'+
 			'**$leaderboard1v1\\2v2\\Team** - Таблица рейтинга\n'+
 			'**$register** - зарегистрироваться в рейтинге\n'+
 			'**$setup <список игроков>** - собрать рейтинговую игру\n'+
-			'**$setupnotrank <список игроков>** - собрать игру без записи в базу рейтинга')
+			'**$noranksetup <список игроков>** - собрать игру без записи в базу рейтинга')
 		}
 		if(message.content.startsWith("$rules")){
 			message.reply('N/A')//TODO
@@ -91,7 +91,7 @@ async function test(message){
 	//sql.recalcRating();
 
 
-	console.log(Number.parseInt(message.content.match(/no(\d+)/)[1]));
+	message.reply(Number.parseInt(message.content.test(/no(\d+)/)));
 	
 
 }
@@ -106,35 +106,40 @@ async function getMentionsArray(message){
 }
 
 
-async function setup(message){
-
-	let orderedMentions = (await getMentionsArray(message)).filter(u => u.bot == false);
-
-	let size = Math.ceil(orderedMentions.length / 2);
-	if(size>4){
-		message.reply(`максимальный размер матча 4 на 4`);
-		return;
-	}
-	if(!message.mentions.users.has(message.author.id) && !isAdmin(message.author)){
-		message.reply(`Необходимо упомянуть себя, только администраторы могут создавать матчи без своего участия`);
-	}
-
-	let teamOne;
-	let teamTwo;
-	if(orderedMentions == size*2){
-		teamOne = orderedMentions.slice(0,size);
-		teamTwo = orderedMentions.slice(size);
-	} else{
-		message.reply(`Необходимо упомянуть ${size*2} пользователей`);
-		return;
-	}
-	
+async function setup(message,rank = true){
 
 	try{
 
-		//проверить все ли игроки могут участвовать в матче(зарегестрированны и нет текущего матча)
-		await sql.canPlay(message.mentions.users.array());
+		let orderedMentions = (await getMentionsArray(message)).filter(u => u.bot == false);
 
+		let size = Math.ceil(orderedMentions.length / 2);
+		if(size>4){
+			throw `максимальный размер матча 4 на 4`;
+		}
+		if(size<1){
+			throw `используйте упоминания ползователей клавишей @ чтобы указать участников матча`;
+		}
+		if(!message.mentions.users.has(message.author.id) && !isAdmin(message.author)){
+			throw `Необходимо упомянуть себя, только администраторы могут создавать матчи без своего участия`
+		}
+
+		let teamOne;
+		let teamTwo;
+		if(orderedMentions.length == size*2){
+			teamOne = orderedMentions.slice(0,size);
+			teamTwo = orderedMentions.slice(size);
+		} else{
+			throw `Необходимо упомянуть ${size*2} пользователей`;
+		}
+	
+
+	
+
+		//проверить все ли игроки могут участвовать в матче(зарегестрированны и нет текущего матча)
+		if(rank){
+			await sql.canPlay(message.mentions.users.array());
+		}
+		
 		//запросить подтверждение всех игроков
 		await Util.confirm(message,message.mentions.users.array(),`Подтвердите участие в матче
 ${teamOne.map(u=>{return `<@${u.id}>`}).join(' ')}
@@ -198,19 +203,21 @@ ${teamTwo.map(u=>{return `<@${u.id}>`}).join(' ')}` ,60000);
 	
 		//матч собран
 		//записать данные о матче, сторонах, банах и заблокировать игроков в базе данных
+		let matchid;
+		if(rank){
+			matchid = await sql.regMatch(size, sidesArray, mapsConst[size*2].indexOf(map) ,mapBans, alliesBan, axisBan);
+		}
 
-		let matchid = await sql.regMatch(size, sidesArray, mapsConst[size*2].indexOf(map) ,mapBans, alliesBan, axisBan);
+			//вывести информацию о собранном матче
 
-		//вывести информацию о собранном матче
-
-		message.channel.send(`Матч №${matchid}
+			message.channel.send(`Матч ${rank?`№${matchid}`:''}
 ${size}v${size}
 Карта: ${map}
 Союзники: 
 ${sidesArray.filter(e=>{return e.side === 0}).map(e=>{return `<@${e.id}> : ${e.division}`}).join(`\n`)}
 Ось: 
 ${sidesArray.filter(e=>{return e.side === 1}).map(e=>{return `<@${e.id}> : ${e.division}`}).join(`\n`)}
-Для подтверждения результатов матча используйте команду $commitWin или $commitLose`);
+${rank?"Для подтверждения результатов матча выигравшая сторона использует команду $commitWin":''}`);
 	} catch(err) {
 		message.channel.send(`${err}, матч отменён`);
 		return;

@@ -20,8 +20,9 @@ const divConst = [tables.allydivs, tables.axisdivs];
 
 async function register(message){
     let user = message.author;
-    if(isBanned(user.id)){
-        message.channel.send(`<@${user.id}> заблокирован!`)
+    if(await isBanned(user.id)){
+        message.channel.send(`<@${user.id}> заблокирован!`);
+        return;
     }
     try{
         await runQuery(`insert into players(id) values (${user.id})`);
@@ -43,7 +44,7 @@ async function unregister(message){
     try{
         await runQuery(`delete from matches where exists(select * from sides where playerid = ${user.id} and matchid = matches.id)`);
         await runQuery(`delete from players where id = ${user.id}`);
-        await runQuery(`insert into banlist(id,date,username) values (${user.id},datetime('now'),${user.username})`)
+        await runQuery(`insert into banlist(id, date, username) values (${user.id}, datetime('now'), "${user.username}" )`);
         await recalcRating();
         message.reply(`Игрок <@${user.id}> удалён из базы данных. Все матчи с его участием удалены. Рейтинг остальных игроков пересчитан.`)
     } catch (err){
@@ -52,14 +53,16 @@ async function unregister(message){
 }
 
 async function isBanned(userid){
-    return new Boolean(await select1Query(`select * from banlist where id = ${userid}`));
+    let a = await select1Query(`select * from banlist where id = ${userid}`);
+    if(a == undefined) return false;
+    else return true;
 }
 
 async function deleteMatch(message){
-    if(message.content.test(/no(\d+)/)){
+    if(/no(\d+)/.test(message.content)){
         let matchid = Number.parseInt(message.content.match(/no(\d+)/)[1]);
         try{
-            await runQuery(`delete form matches where id = ${matchid}`);
+            await runQuery(`delete from matches where id = ${matchid}`);
             await recalcRating();
             message.channel.send(`Матч №${matchid} отменён/удалён. Рейтинг пересчитан без учёта данного матча.`)
         } catch (err){
