@@ -159,6 +159,7 @@ async function commit(matchid,result){
 async function getStats(message,user){
     try{
         let main = await select1Query(`select * from players where id = ${user.id}`);
+        if(main === undefined) throw 'не зарегестрирован'
         let games = await selectQuery(`select * from sides join matches on matches.id = sides.matchid where sides.playerid = ${user.id}; `);
         let rank1v1 = (await select1Query(`select rank from (select dense_rank() over (order by elo1v1 desc) as rank, id from players where elo1v1 is not null) where id = ${user.id}`));
         let rank2v2 = (await select1Query(`select rank from (select dense_rank() over (order by elo2v2 desc) as rank, id from players where elo2v2 is not null) where id = ${user.id}`));
@@ -303,6 +304,7 @@ function runQuery(query){
     let db = new sqlite3.Database('./data.db');
     try{
         return new Promise((resolve,reject) => {
+        db.exec('PRAGMA foreign_keys = ON;');
         db.run(query,function(err){
             if (err) reject(err);
             resolve(this.lastID);
