@@ -7,6 +7,9 @@ const mapsConst = tables.maps;
 const axisConst = tables.axisdivs;
 const alliesConst = tables.allydivs;
 const sql = require("./sql.js");
+const prefix = config.prefix;
+const map = require("./map");
+const div = require("./div");
 
 
 
@@ -19,64 +22,99 @@ client.on('ready' , () => {
 
 
 function process(message) {
-	if(message.channel.type === 'text' && message.channel.name === "ru-sd-bot"){
-		if(message.content.startsWith("$setup")){
-			setup(message);
-		} 
+	if(message.content.startsWith(prefix) && message.channel.type === 'text' && message.channel.name === "ru-sd-bot"){
 
-		if(message.content.startsWith("$noranksetup")){
-			setup(message,false);
-		}
+		command = message.content.substr(1);
+		command.replace('\n','');
+		command = command.split(' ');		
+
+		switch(command[0].toLowerCase()){
+
+			case("map"):
+				map.exec(message,command.slice(1));
+			break;
 	
-		if(message.content.startsWith("$register")){
-			sql.register(message);
-		}
+			case("div"):
+				div.exec(message,command.slice(1));
+			break;
+	
+			case("side"):
+			case("faction"):
+				if(Math.random()<0.5){
+					message.reply("Союзники");
+				}else{
+					message.reply("Ось");
+				}
+			break;
+	
+			case("flip"):
+			case("coin"):
+				if(Math.random()<0.5){
+					message.reply("Орёл");
+				}else{
+					message.reply("Решка");
+				}
+			break;
 
-		if(message.content.startsWith("$unregister")){
-			if(isAdmin(message.author)){
-				sql.unregister(message);
-			}
-		}
+			//new features
+			
+			case("setup"):
+				setup(message);
+			break; 
 
-		if(message.content.startsWith("$forceCommit")){
-			if(isAdmin(message.author)){
-				forceCommit(message);
-			}
-		}
-		if(message.content.startsWith("$deleteMatch")){
-			if(isAdmin(message.author)){
-				sql.deleteMatch(message);
-			}
-		}
+			case("noranksetup"):
+				setup(message,false);
+			break;
+		
+			case("register"):
+				sql.register(message);
+			break;
 
-		if(message.content.startsWith("$commitWin")){
-			commit(message,1);
-		}
-		//if(message.content.startsWith("$commitLose")){
-		//	commit(message,0);
-		//}
-		if(message.content.startsWith("$stats")){
-			sql.getStats(message,message.author);
-		}
-		if(message.content.startsWith("$leaderboard1v1")){
-			sql.leaderboard(message,1);
-		}
-		if(message.content.startsWith("$leaderboard2v2")){
-			sql.leaderboard(message,2);
-		}
-		if(message.content.startsWith("$leaderboardTeam")){
-			sql.leaderboard(message,3);
-		}
-		if(message.content.startsWith("$help")){
-			message.reply(//'**$rules** - Правила рейтинга\n'+
-			'**$stats** - личная статистика\n'+
-			'**$leaderboard1v1\\2v2\\Team** - Таблица рейтинга\n'+
-			'**$register** - зарегистрироваться в рейтинге\n'+
-			'**$setup <список игроков>** - собрать рейтинговую игру\n'+
-			'**$noranksetup <список игроков>** - собрать игру без записи в базу рейтинга')
-		}
-		if(message.content.startsWith("$rules")){
-			message.reply('N/A')//TODO
+			case("unregister"):
+				if(isAdmin(message.author)){
+					sql.unregister(message);
+				break;
+			}
+
+			case("forceCommit"):
+				if(isAdmin(message.author)){
+					forceCommit(message);
+				break;
+			}
+			case("deleteMatch"):
+				if(isAdmin(message.author)){
+					sql.deleteMatch(message);
+				break;
+			}
+
+			case("commitWin"):
+				commit(message,1);
+			break;
+
+			case("stats"):
+				sql.getStats(message,message.author);
+			break;
+			case("leaderboard1v1"):
+				sql.leaderboard(message,1);
+			break;
+			case("leaderboard2v2"):
+				sql.leaderboard(message,2);
+			break;
+			case("leaderboardTeam"):
+				sql.leaderboard(message,3);
+			break;
+			case("help"):
+				message.reply(//'**$rules** - Правила рейтинга\n'+
+				'**$stats** - личная статистика\n'+
+				'**$leaderboard1v1\\2v2\\Team** - Таблица рейтинга\n'+
+				'**$register** - зарегистрироваться в рейтинге\n'+
+				'**$setup <список игроков>** - собрать рейтинговую игру\n'+
+				'**$noranksetup <список игроков>** - собрать игру без записи в базу рейтинга\n'+
+				'**$flip $coin** - бросить монетку\n'+
+				'**$faction $side** - случайная сторона\n'+
+				'Дивизии:\n'+div.help()+
+				'Карты:\n'+map.help())
+			break;
 		}
 	}
 }
