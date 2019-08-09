@@ -10,23 +10,70 @@ const sql = require("./sql.js");
 const prefix = config.prefix;
 const map = require("./map");
 const div = require("./div");
-
+const parse = require("./parser");
 
 
 client.login(config.token);
 
 client.on('ready' , () => {
-	client.user.setActivity('ваши команды', { type: 'LISTENING' })
+	client.user.setActivity('ваши команды', { type: 'LISTENING' });
 });
 
 
 
 function process(message) {
-	if(message.content.startsWith(prefix) && message.channel.type === 'text' && message.channel.name === "ru-sd-bot"){
+
+	if(message.attachments.first()
+	&& message.channel.type === 'text'
+	&& !message.author.bot){
+		if(message.attachments.first().url.endsWith(".rpl3")){
+			parse.replayInfo(message);
+		}
+	}
+		
+	if(message.content.startsWith(prefix) 
+	&& message.channel.type === 'text' 
+	&& message.channel.name === "deck-chat"
+	&& !message.author.bot){
+		
+		command = message.content.substr(1);
+		command = command.split(/\s+/);	
+		
+		if(command[0].toLowerCase() === "deck"){
+			if(command[1] ){
+				let embed = new Discord.RichEmbed();
+				let [divname,divincome] = parse.getDivision(command[1]);
+				if(!(divname && divincome)){
+					return;
+				}
+				if(command[2]){
+					embed.title = command.slice(2).join(' ');;
+				}
+				embed.setAuthor(message.author.username,message.author.avatarURL);
+				embed.addField("Дивизия", divname,true);
+				embed.addField("Тип дохода",divincome,true);
+				embed.addField("Код", command[1]);
+				if(message.attachments.first()){
+					embed.setImage(message.attachments.first().url);
+				}
+				message.channel.send(embed);
+			}else{
+				message.author.send("**$deck <код для импорта> <название(необязательно)>**\n"+
+				"Пример: \`\`\`$deck DCRLF6KEIS4C3G8hLg45Et7jmS4OOVo045VUzjkaQlaYcgABkt7jkWugAQdOABFgwANmDAAQGQVpEkpWkqJFaUcgABEJZWlAkOOUI845BtIAFBGuOgcuABWiLjlVRgAQPC45RxYAFbPAAkuWAAA= \nтестовая 9ка\`\`\`\n"+
+				"Можно написать эту комманду в описании к скриншоту чтобы он добавился в эмбед\n"+
+				"После отправки своё сообщение можно удалить чтобы остался только эмбед");
+			}		
+		}
+	}
+
+
+	if(message.content.startsWith(prefix) 
+	&& message.channel.type === 'text' 
+	&& message.channel.name === "ru-sd-bot"
+	&& !message.author.bot){
 
 		command = message.content.substr(1);
-		command.replace('\n','');
-		command = command.split(' ');		
+		command = command.split(/\s+/);		
 
 		switch(command[0].toLowerCase()){
 
