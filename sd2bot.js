@@ -23,13 +23,7 @@ client.on('ready' , () => {
 
 
 function process(message) {
-
-	if(message.channel.type === 'text'
-	&& message.content.startsWith("$online")
-	&& !message.author.bot){
-		scrapper.online(message);
-	}
-
+	
 	if(message.attachments.first()
 	&& message.channel.type === 'text'
 	&& !message.author.bot){
@@ -83,6 +77,10 @@ function process(message) {
 		command = command.split(/\s+/);		
 
 		switch(command[0].toLowerCase()){
+
+			case("online"):
+				scrapper.online(message);
+			break;
 
 			case("map"):
 				map.exec(message,command.slice(1));
