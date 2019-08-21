@@ -11,6 +11,7 @@ const prefix = config.prefix;
 const map = require("./map");
 const div = require("./div");
 const parse = require("./parser");
+const scrapper = require("./scraper");
 
 
 client.login(config.token);
@@ -22,6 +23,12 @@ client.on('ready' , () => {
 
 
 function process(message) {
+
+	if(message.channel.type === 'text'
+	&& message.content.startsWith("$online")
+	&& !message.author.bot){
+		scrapper.online(message);
+	}
 
 	if(message.attachments.first()
 	&& message.channel.type === 'text'
