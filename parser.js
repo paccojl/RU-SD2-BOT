@@ -18,12 +18,12 @@ function getGameDuration(time) {
 
 
 function getHeader(binData){
+    pop = (count) => {let ret = parseInt(binData.slice(0,count),2); binData = binData.slice(count); return ret;};
     let res = [];
     for(i=0;i<5;i++){
-      let count = parseInt(binData.slice(0,5),2);
-      res.push(parseInt(binData.slice(5,5+count),2));
-      binData = binData.slice(5+count);
-    }
+      let count = pop(5);
+      res.push(pop(count));
+    } 
     return res;
 }
 module.exports.getDivision = getDivision;
@@ -34,7 +34,8 @@ function getDivision(code) {
     binaryData = binaryData.concat(x.toString(2).padStart(8,"0"));
   }
   let header = getHeader(binaryData);
-  return [divs[header[2]],incomeTypes[header[4]]];
+  let division = divs[header[2]] ? divs[header[2]] : header[2];
+  return [division,incomeTypes[header[4]]];
 }
 
 module.exports.replayInfo = replayInfo;
@@ -65,7 +66,7 @@ function replayInfo(message){
       const inversePoints = gameData.InverseSpawnPoints?"Прямые":"Перевёрнутые";
 
       const mapInfo = gameData.Map.match(/_\dx\d_(.+)_LD_(\dv\d)/);
-      const mapName = maps[mapInfo[1]];
+      const mapName = maps[mapInfo[1]] ? maps[mapInfo[1]] : mapInfo[1];
       const mapSize = mapInfo[2];
 
       let players = [];
@@ -79,7 +80,7 @@ function replayInfo(message){
         let rank = player.PlayerRank;
         let deck = player.PlayerDeckContent;
         let [div,income] = getDivision(player.PlayerDeckContent);
-        let side = player.PlayerAlliance;
+        let side = parseInt(player.PlayerAlliance);
         players.push({"name":name,"elo":elo,"rank":rank,"deck":deck,"side":side,"level":level,"eugId":eugId,"div":div,"income":income});
       }
 
@@ -100,16 +101,27 @@ function replayInfo(message){
       embed.addField("Карта", `${mapName} ${mapSize}`, true);
       embed.addField("Точки спавна", inversePoints, true);
 
-      for(player of [ ...players.filter(p=>p.side) , ...players.filter(p=>!p.side)]){
-        embed.addBlankField();
-        embed.addField("Игрок", `${player.name} (EugID: ${player.eugId})`);
-        embed.addField("Уровень", `${player.level}`,true);
-        embed.addField("Ранг", `${player.rank} (${player.elo})`,true);
-        embed.addField("Дивизия", `${player.div} (${player.income})`);
-        embed.addField("Код дивизии", `${player.deck}`);
+      if(players.length > 2){
+        let acc = '';
+        for(player of players.filter(p=>p.side)){
+          acc = `${acc}**${player.name}** (EugId: ${player.eugId})\nДивизия: ${player.div} (${player.income})\nКод: ${player.deck}\n\n`;
+        }
+        embed.addField("Команда 1", acc);
+        acc = '';
+        for(player of players.filter(p=>!p.side)){
+          acc = `${acc}**${player.name}** (EugId: ${player.eugId})\nДивизия: ${player.div} (${player.income})\nКод: ${player.deck}\n\n`;
+        }
+        embed.addField("Команда 2", acc);
+      } else {
+        for(player of [ ...players.filter(p=>p.side) , ...players.filter(p=>!p.side)]){
+          embed.addBlankField();
+          embed.addField("Игрок", `${player.name} (EugID: ${player.eugId})`);
+          embed.addField("Уровень", `${player.level}`,true);
+          embed.addField("Ранг", `${player.rank} (${player.elo})`,true);
+          embed.addField("Дивизия", `${player.div} (${player.income})`);
+          embed.addField("Код дивизии", `${player.deck}`);
+        }
       }
-
-
       message.channel.send(embed);
     });
 };
@@ -167,7 +179,9 @@ const divs = {
   156 : "352. Infantrie",
   139 : "Korück 559",
   140 : "1. Lovas",
-  141 : "12. Tartalék"
+  141 : "12. Tartalék",
+  270 : "84-ya Gvard. Strelkovy",
+  269 : "25. Panzergrenadier"
 }
 
 const incomeLevel = {
@@ -229,4 +243,5 @@ const maps = {
   Marecages_Naratch_lake : "Naratch Lake",
   Rivers_Pleshchenitsy_S : "Pleshchenitsy South",
   Bridges_Smolyany : "Smolyany",
+  Siedlce : "Siedlce"
 }
