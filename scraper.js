@@ -6,10 +6,12 @@ const options = {
     headers: { 'user-agent': 'node.js' }
 }
 
-
+var lastcall = 0;
 
 function online(message) {
-    rp(url, options)
+    let curtime = new Date().getTime();
+    if (curtime - lastcall > 60000){
+        rp(url, options)
         .then(function (html) {
             const embed = new Discord.RichEmbed();
             embed.setTitle("Онлайн Steel Division 2")
@@ -22,5 +24,7 @@ function online(message) {
         .catch(function (err) {
             console.log(err);
         });
+        lastcall = curtime;
+    }
 }
 module.exports.online = online;
