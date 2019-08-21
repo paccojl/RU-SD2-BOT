@@ -13,7 +13,8 @@
 			"Slutsk East",
 			"Slutsk West",
 			"Slutsk",
-			"Tsel"
+			"Tsel",
+			"Siedlce"
 		],
 		"4" : [
 			"Autobahn Zur Holle",
@@ -26,7 +27,8 @@
 			"Shchedrin",
 			"Slutsk",
 			"Veselovo",
-			"Vitebsk East"
+			"Vitebsk East",
+			"Siedlce"
 		],
 		"6" : [
 			"Krupki",
@@ -65,7 +67,8 @@
 		"3rd US Armoured",
 		"3rd Canadian Infantry",
 		"15th Infantry",
-		"2e Blindée"
+		"2e Blindée",
+		"84-ya Gvard. Strelkovy"
 	],
 
 	"axisdivs":
@@ -83,6 +86,7 @@
 		"Panzer Lehr",
 		"116. Panzer",
 		"352. Infantrie",
-		"1. Skijäger"
+		"1. Skijäger",
+		"25. Panzergrenadier"
 	]
 }	
