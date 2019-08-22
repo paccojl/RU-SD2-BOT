@@ -13,7 +13,7 @@ function getGameDuration(time) {
   }
   const minutes = Math.floor(time / 60);
   const seconds = time - minutes * 60;
-  return `${minutes}:${seconds.padStart(2)}`;
+  return `${minutes}:${seconds.toString().padStart(2)}`;
 }
 
 
