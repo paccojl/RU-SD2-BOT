@@ -13,7 +13,7 @@ function getGameDuration(time) {
   }
   const minutes = Math.floor(time / 60);
   const seconds = time - minutes * 60;
-  return `${minutes}:${seconds.toString().padStart(2)}`;
+  return `${minutes}:${seconds.toString().padStart(2,'0')}`;
 }
 
 
@@ -65,9 +65,9 @@ function replayInfo(message){
       const gameMode = mode[gameData.VictoryCond];
       const inversePoints = gameData.InverseSpawnPoints?"Прямые":"Перевёрнутые";
 
-      const mapInfo = gameData.Map.match(/_\dx\d_(.+)_LD_(\dv\d)/);
-      const mapName = maps[mapInfo[1]] ? maps[mapInfo[1]] : mapInfo[1];
-      const mapSize = mapInfo[2];
+      const mapInfo = gameData.Map.match(/_\dx\d_(.+)_LD(_(\dv\d))?/);
+      const mapName = mapInfo[1]?maps[mapInfo[1]] ? maps[mapInfo[1]] : mapInfo[1] : gameData.Map;
+      const mapSize = mapInfo[3]?mapInfo[3]:'';
 
       let players = [];
 
