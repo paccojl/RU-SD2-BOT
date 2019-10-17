@@ -181,7 +181,11 @@ const divs = {
   140 : "1. Lovas",
   141 : "12. Tartalék",
   270 : "84-ya Gvard. Strelkovy",
-  269 : "25. Panzergrenadier"
+  269 : "25. Panzergrenadier",
+  262 : '5. SS-Panzer "Wiking"',
+  263 : 'Fallschirm-Panzer "Hermann Göring"',
+  255 : '1 Piechoty "Tadeusza Kościuszki"',
+  261 : "Armia Krajowa"
 }
 
 const incomeLevel = {
@@ -243,5 +247,8 @@ const maps = {
   Marecages_Naratch_lake : "Naratch Lake",
   Rivers_Pleshchenitsy_S : "Pleshchenitsy South",
   Bridges_Smolyany : "Smolyany",
-  Siedlce : "Siedlce"
+  Siedlce : "Siedlce",
+  Zbuczyn : "Zbuczy",
+  Vistula_Gora_Kalwaria : "Gora Kalwaria",
+  West_Brest : "Brest West"
 }
