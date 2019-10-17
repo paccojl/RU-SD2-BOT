@@ -38,6 +38,17 @@ function getDivision(code) {
   return [division,incomeTypes[header[4]]];
 }
 
+function findClosingBrackets(string){
+  let parCounter = 1;
+  let i = 0
+  do{
+    i++;
+    if(content[i]=='{') parCounter++;
+    if(content[i]=='}') parCounter--;
+  }while(parCounter!=0)
+  return i;
+}
+
 module.exports.replayInfo = replayInfo;
 function replayInfo(message){
   const url = message.attachments.first().url;
@@ -47,9 +58,9 @@ function replayInfo(message){
       fileType(buffer);
       content = buffer.toString();
       content = content.slice(content.search(`{"game":`));
-      const gameBlock = content.slice(0,content.search("}}")+2);
+      const gameBlock = content.slice(0,findClosingBrackets(content)+1);
       content = content.slice(content.search(`{"result":`));
-      const resultBlock = content.slice(0,content.search("}}")+2);
+      const resultBlock = content.slice(0,findClosingBrackets(content)+1);
       const gameDataAll = JSON.parse(gameBlock);
       const gameData = gameDataAll.game;
       const resultData = JSON.parse(resultBlock).result;
@@ -71,8 +82,9 @@ function replayInfo(message){
 
       let players = [];
 
-      for(playerKey of Object.keys(gameDataAll).slice(1)){
+      for(playerKey of Object.keys(gameDataAll).filter(v=>v.startsWith('player'))){
         let player = gameDataAll[playerKey];
+        let id = parseInt(playerKey.match(/player_(\d+)/)[1]);
         let name = player.PlayerName?player.PlayerName:"AI";
         let eugId = player.PlayerUserId;
         let level = player.PlayerLevel;
@@ -81,14 +93,21 @@ function replayInfo(message){
         let deck = player.PlayerDeckContent;
         let [div,income] = getDivision(player.PlayerDeckContent);
         let side = parseInt(player.PlayerAlliance);
-        players.push({"name":name,"elo":elo,"rank":rank,"deck":deck,"side":side,"level":level,"eugId":eugId,"div":div,"income":income});
+        players.push({"id":id,"name":name,"elo":elo,"rank":rank,"deck":deck,"side":side,"level":level,"eugId":eugId,"div":div,"income":income});
       }
+
+      const replayFrom = gameDataAll.ingamePlayerId; 
 
       const embed = new Discord.RichEmbed();
 
       embed.setTitle(gameName ? gameName : "");
       embed.setColor(0x00AE86);
       embed.setAuthor(message.author.username,message.author.avatarURL);
+
+      if(replayFrom != undefined){
+        embed.addField("Реплей от", players.find(v=>v.id == replayFrom).name);
+      }
+      
       embed.addField("Исход боя", `||${outCome}||`, true);
       embed.addField("Продолжительность", `||${duration}||`, true);
 
