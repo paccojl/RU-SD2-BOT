@@ -81,10 +81,12 @@ function replayInfo(message){
       const mapSize = mapInfo[3]?mapInfo[3]:'';
 
       let players = [];
+      let curid = 0;
 
       for(playerKey of Object.keys(gameDataAll).filter(v=>v.startsWith('player'))){
         let player = gameDataAll[playerKey];
-        let id = parseInt(playerKey.match(/player_(\d+)/)[1]);
+        let id = curid;
+        curid++;
         let name = player.PlayerName?player.PlayerName:"AI";
         let eugId = player.PlayerUserId;
         let level = player.PlayerLevel;
