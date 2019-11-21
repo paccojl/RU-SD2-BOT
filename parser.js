@@ -39,8 +39,8 @@ function getDivision(code) {
 }
 
 function findClosingBrackets(string){
-  let parCounter = 1;
-  let i = 0
+  let parCounter = 0;
+  let i = -1;
   do{
     i++;
     if(content[i]=='{') parCounter++;
@@ -59,18 +59,22 @@ function replayInfo(message){
       content = buffer.toString();
       content = content.slice(content.search(`{"game":`));
       const gameBlock = content.slice(0,findClosingBrackets(content)+1);
-      content = content.slice(content.search(`{"result":`));
-      const resultBlock = content.slice(0,findClosingBrackets(content)+1);
+      const resultIndex = content.search(`{"result":`);
+      let resultData;
+      if(resultIndex!=-1){
+        content = content.slice(content.search(`{"result":`));
+        const resultBlock = content.slice(0,findClosingBrackets(content)+1);
+        resultData = JSON.parse(resultBlock).result;
+      }
       const gameDataAll = JSON.parse(gameBlock);
       const gameData = gameDataAll.game;
-      const resultData = JSON.parse(resultBlock).result;
 
       const gameName = gameData.ServerName;
-      const duration = getGameDuration(resultData.Duration);
+      const duration = resultData?getGameDuration(resultData.Duration):"N/A";
       const startMoney = gameData.InitMoney;
       const timeLimit = getGameDuration(gameData.TimeLimit);
       const gameVersion = gameData.Version;
-      const outCome = victory[resultData.Victory];
+      const outCome = resultData?victory[resultData.Victory]:"N/A";
       const scoreCap = `${scoreLimit[gameData.ScoreLimit]} (${gameData.ScoreLimit})`;
       const income = incomeLevel[gameData.IncomeRate];
       const gameMode = mode[gameData.VictoryCond];
