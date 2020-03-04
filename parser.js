@@ -173,7 +173,9 @@ const incomeTypes = {
     0:"Balanced",
     1:"Vanguard",
     2:"Maverick",
-    3:"Juggernaut"
+    3:"Juggernaut",
+    4:"Flat line",
+    5:"V for victory"
 }
 
 const divs = {
@@ -210,7 +212,13 @@ const divs = {
   262 : '5. SS-Panzer "Wiking"',
   263 : 'Fallschirm-Panzer "Hermann Göring"',
   255 : '1 Piechoty "Tadeusza Kościuszki"',
-  261 : "Armia Krajowa"
+  261 : "Armia Krajowa",
+  350 : "Panssaridivisioona",
+  354 : "Ryhmä Raappana",
+  356 : "122. Infanterie-Division",
+  352 : "126-y L. Gornostrelkovy Korpus",
+  351 : "Podv. Gruppa Vyborg",
+  357 : "358-ya Strelkovy Div"
 }
 
 const incomeLevel = {
