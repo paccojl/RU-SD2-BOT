@@ -77,7 +77,7 @@ function replayInfo(message){
       const outCome = resultData?victory[resultData.Victory]:"N/A";
       const scoreCap = `${scoreLimit[gameData.ScoreLimit]} (${gameData.ScoreLimit})`;
       const income = incomeLevel[gameData.IncomeRate];
-      const gameMode = mode[gameData.VictoryCond];
+      const gameMode = mode[gameData.CombatRule];
       const inversePoints = gameData.InverseSpawnPoints?"Прямые":"Перевёрнутые";
 
       const mapInfo = gameData.Map.match(/_\dx\d_(.+)_LD(_(\dv\d))?/);
