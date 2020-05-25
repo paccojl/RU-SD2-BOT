@@ -110,63 +110,63 @@ function process(message) {
 
 			//new features
 			
-			case("setup"):
-				setup(message);
-			break; 
+			// case("setup"):
+			// 	setup(message);
+			// break; 
 
-			case("noranksetup"):
-				setup(message,false);
-			break;
+			// case("noranksetup"):
+			// 	setup(message,false);
+			// break;
 		
-			case("register"):
-				sql.register(message);
-			break;
+			// case("register"):
+			// 	sql.register(message);
+			// break;
 
-			case("unregister"):
-				if(isAdmin(message.author)){
-					sql.unregister(message);
-				break;
-			}
+			// case("unregister"):
+			// 	if(isAdmin(message.author)){
+			// 		sql.unregister(message);
+			// 	break;
+			// }
 
-			case("forceCommit"):
-				if(isAdmin(message.author)){
-					forceCommit(message);
-				break;
-			}
-			case("deleteMatch"):
-				if(isAdmin(message.author)){
-					sql.deleteMatch(message);
-				break;
-			}
+			// case("forceCommit"):
+			// 	if(isAdmin(message.author)){
+			// 		forceCommit(message);
+			// 	break;
+			// }
+			// case("deleteMatch"):
+			// 	if(isAdmin(message.author)){
+			// 		sql.deleteMatch(message);
+			// 	break;
+			// }
 
-			case("commitWin"):
-				commit(message,1);
-			break;
+			// case("commitWin"):
+			// 	commit(message,1);
+			// break;
 
-			case("stats"):
-				sql.getStats(message,message.author);
-			break;
-			case("leaderboard1v1"):
-				sql.leaderboard(message,1);
-			break;
-			case("leaderboard2v2"):
-				sql.leaderboard(message,2);
-			break;
-			case("leaderboardTeam"):
-				sql.leaderboard(message,3);
-			break;
-			case("help"):
-				message.reply(//'**$rules** - Правила рейтинга\n'+
-				'**$stats** - личная статистика\n'+
-				'**$leaderboard1v1\\2v2\\Team** - Таблица рейтинга\n'+
-				'**$register** - зарегистрироваться в рейтинге\n'+
-				'**$setup <список игроков>** - собрать рейтинговую игру\n'+
-				'**$noranksetup <список игроков>** - собрать игру без записи в базу рейтинга\n'+
-				'**$flip $coin** - бросить монетку\n'+
-				'**$faction $side** - случайная сторона\n'+
-				'Дивизии:\n'+div.help()+
-				'Карты:\n'+map.help())
-			break;
+			// case("stats"):
+			// 	sql.getStats(message,message.author);
+			// break;
+			// case("leaderboard1v1"):
+			// 	sql.leaderboard(message,1);
+			// break;
+			// case("leaderboard2v2"):
+			// 	sql.leaderboard(message,2);
+			// break;
+			// case("leaderboardTeam"):
+			// 	sql.leaderboard(message,3);
+			// break;
+			// case("help"):
+			// 	message.reply(//'**$rules** - Правила рейтинга\n'+
+			// 	'**$stats** - личная статистика\n'+
+			// 	'**$leaderboard1v1\\2v2\\Team** - Таблица рейтинга\n'+
+			// 	'**$register** - зарегистрироваться в рейтинге\n'+
+			// 	'**$setup <список игроков>** - собрать рейтинговую игру\n'+
+			// 	'**$noranksetup <список игроков>** - собрать игру без записи в базу рейтинга\n'+
+			// 	'**$flip $coin** - бросить монетку\n'+
+			// 	'**$faction $side** - случайная сторона\n'+
+			// 	'Дивизии:\n'+div.help()+
+			// 	'Карты:\n'+map.help())
+			// break;
 		}
 	}
 }
