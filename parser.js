@@ -218,7 +218,13 @@ const divs = {
   356 : "122. Infanterie-Division",
   352 : "126-y L. Gornostrelkovy Korpus",
   351 : "Podv. Gruppa Vyborg",
-  357 : "358-ya Strelkovy Div"
+  357 : "358-ya Strelkovy Div",
+  628 : '2nd Infantry Division "Indianhead"',
+  264 : '1 Dywizja Pancerna ',
+  627 : '6th British Airborne Division',
+  623 : '12. SS-Panzerdivision',
+  624 : '17. SS-Panzergrenadier-Division',
+  626 : '3. Fallschirmjäger'
 }
 
 const incomeLevel = {
