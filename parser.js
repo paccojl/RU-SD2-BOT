@@ -224,7 +224,13 @@ const divs = {
   627 : '6th British Airborne Division',
   623 : '12. SS-Panzerdivision',
   624 : '17. SS-Panzergrenadier-Division',
-  626 : '3. Fallschirmjäger'
+  626 : '3. Fallschirmjäger',
+  433 : '1 Blindată "Romania Mare"',
+  434 : '4 Munte',
+  435 : '5 Cavalerie Motorizată',
+  436 : '3-ya VDV',
+  437 : '7-y Mechanizi. Korpus',
+  438 : 'Morskaya Gruppa Bakhtina'
 }
 
 const incomeLevel = {
