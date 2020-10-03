@@ -14,6 +14,10 @@ const parse = require("./parser");
 const scrapper = require("./scraper");
 
 
+const phaseEnum = ["A","B","C"];
+const starEnum = ["","✯","✯✯","✯✯✯"];
+
+
 client.login(config.token);
 
 client.on('ready' , () => {
@@ -43,7 +47,7 @@ function process(message) {
 		if(command[0].toLowerCase() === "deck"){
 			if(command[1] ){
 				let embed = new Discord.RichEmbed();
-				let [divname,divincome] = parse.getDivision(command[1]);
+				let [divname,divincome,units] = parse.getDivision(command[1]);
 				if(!(divname && divincome)){
 					return;
 				}
@@ -54,6 +58,25 @@ function process(message) {
 				embed.addField("Дивизия", divname,true);
 				embed.addField("Тип дохода",divincome,true);
 				embed.addField("Код", command[1]);
+				units = units.sort((a,b)=> a.phase - b.phase);
+				let unitsToString = (v => `${phaseEnum[v.phase]} ${v.count} x ${starEnum[v.xp]} ${v.name} ${v.transport?`on ${v.transport}`:""}`)
+				let addCat = ((n,f) => {
+					let catUnits = units.filter(v => v.type == f);
+					if(catUnits.length!=0){
+						embed.addField(n, catUnits.map(unitsToString).join("\n") );
+					}
+					
+				});
+				
+				addCat("Recon","Recons");
+				addCat("Infantry","Infantry");
+				addCat("Tank","Tanks");
+				addCat("Support","Support");
+				addCat("Anti-Tank","AT")
+				addCat("Anti-Air","DCA");
+				addCat("Artillery","Art");
+				addCat("Air","Planes");
+
 				if(message.attachments.first()){
 					embed.setImage(message.attachments.first().url);
 				}

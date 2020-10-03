@@ -7,6 +7,9 @@ const Discord = require("discord.js");
 const fetch = require("node-fetch");
 const fileType = require("file-type");
 
+const unittable = require("./unittable.json");
+
+
 function getGameDuration(time) {
   if (time === "0" || time === 0) {
     return "No Limit";
@@ -24,7 +27,29 @@ function getHeader(binData){
       let count = pop(5);
       res.push(pop(count));
     } 
-    return res;
+    let countLen = pop(5);
+    let phaseLen = pop(5);
+    let xpLen = pop(5);
+    let unitLen = pop(5);
+    let cardsCount = res[3];
+    units = [];
+
+    for(i=0;i<cardsCount;i++){
+      let unit = new Object();
+      unit.count = pop(countLen);
+      unit.phase = pop(phaseLen);
+      unit.xp = pop(xpLen);
+      let unitid = pop(unitLen)-1;
+      let transport = pop(unitLen)-1;
+      unit.name = unittable[unitid]?unittable[unitid].name:unitid;
+      unit.transport = unittable[transport]?unittable[transport].name:"";
+      unit.type = unittable[unitid]?unittable[unitid].type:"";
+      //units.push(`${phaseEnum[phase]} ${starEnum[xp]} ${count} x ${unitname} ${transportName}`);
+      units.push(unit);
+    }
+
+
+    return [res,units];
 }
 module.exports.getDivision = getDivision;
 function getDivision(code) {
@@ -33,9 +58,9 @@ function getDivision(code) {
   for (x of base64data.values()) {
     binaryData = binaryData.concat(x.toString(2).padStart(8,"0"));
   }
-  let header = getHeader(binaryData);
+  let [header,units] = getHeader(binaryData);
   let division = divs[header[2]] ? divs[header[2]] : header[2];
-  return [division,incomeTypes[header[4]]];
+  return [division,incomeTypes[header[4]],units];
 }
 
 function findClosingBrackets(string){
