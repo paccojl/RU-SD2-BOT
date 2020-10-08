@@ -250,6 +250,8 @@ const divs = {
   623 : '12. SS-Panzerdivision',
   624 : '17. SS-Panzergrenadier-Division',
   626 : '3. Fallschirmjäger',
+  430 : '16. Panzer',
+  431 : '97-ya Gvard. Strelkovy',
   433 : '1 Blindată "Romania Mare"',
   434 : '4 Munte',
   435 : '5 Cavalerie Motorizată',
