@@ -257,7 +257,10 @@ const divs = {
   435 : '5 Cavalerie Motorizată',
   436 : '3-ya VDV',
   437 : '7-y Mechanizi. Korpus',
-  438 : 'Morskaya Gruppa Bakhtina'
+  438 : 'Morskaya Gruppa Bakhtina',
+  629 : '10-y Gv. Tankovy Korpus',
+  637 : '20. Panzergrenadier'
+
 }
 
 const incomeLevel = {
