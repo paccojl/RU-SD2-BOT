@@ -259,7 +259,9 @@ const divs = {
   437 : '7-y Mechanizi. Korpus',
   438 : 'Morskaya Gruppa Bakhtina',
   629 : '10-y Gv. Tankovy Korpus',
-  637 : '20. Panzergrenadier'
+  637 : '20. Panzergrenadier',
+  643 : '1. Fallschirmjäger',
+  646 : '2nd New-Zealand'
 
 }
 
