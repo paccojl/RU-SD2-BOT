@@ -43,7 +43,7 @@ function getHeader(binData){
       let transport = pop(unitLen)-1;
       unit.name = unittable[unitid]?unittable[unitid].name:unitid;
       unit.transport = unittable[transport]?unittable[transport].name:"";
-      unit.type = unittable[unitid]?unittable[unitid].type:"";
+      unit.type = unittable[unitid]?unittable[unitid].type:"undef";
       //units.push(`${phaseEnum[phase]} ${starEnum[xp]} ${count} x ${unitname} ${transportName}`);
       units.push(unit);
     }
@@ -245,7 +245,7 @@ const divs = {
   351 : "Podv. Gruppa Vyborg",
   357 : "358-ya Strelkovy Div",
   628 : '2nd Infantry Division "Indianhead"',
-  264 : '1 Dywizja Pancerna ',
+  264 : '1 Dywizja Pancerna',
   627 : '6th British Airborne Division',
   623 : '12. SS-Panzerdivision',
   624 : '17. SS-Panzergrenadier-Division',
@@ -261,7 +261,18 @@ const divs = {
   629 : '10-y Gv. Tankovy Korpus',
   637 : '20. Panzergrenadier',
   643 : '1. Fallschirmjäger',
-  646 : '2nd New-Zealand'
+  646 : '2nd New-Zealand',
+  636 : "11. SS-Freiwilligen Panzergrenadier \"Nordland\"",
+  728 : "Verteidigungsbereich Toulon",
+  419 : "Panzerverband Strachwitz",
+  638 : "Panzergrenadier \"Grossdeutschland\"",
+  726 : "52. Sicherungs-Division z.b.V",
+  631 : "1e Division Française Libre",
+  728 : "Verteidigungsbereich Toulon",
+  640 : "7. Eesti Laskurdiviis",
+  635 : "19-y Tank Corpus",
+  641 : "Podv. Gruppa Fedyunkin",
+  727 : "Rezerv 43-y Armii"
 
 }
 
